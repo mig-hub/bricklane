@@ -8,18 +8,21 @@
 #define BUFFER_SIZE 4096
 #define NEXT goto **ip++
 #define CELL_SIZE (sizeof(void*))
-#define HEADER(N,L,I,H) *dp = link; link = dp++; \
-  *dp = (word_metadata *)malloc(sizeof(word_metadata)); \
-  ((word_metadata*)*dp)->length = L; \
-  ((word_metadata*)*dp)->immediate = I; \
-  ((word_metadata*)*dp)->hidden = H; \
-  sprintf(((word_metadata*)*dp)->name, N); \
+#define HEADER(N,L,I,H) dp->p = link; link = dp++; \
+  dp->p = (word_metadata *)malloc(sizeof(word_metadata)); \
+  ((word_metadata*)dp->p)->length = L; \
+  ((word_metadata*)dp->p)->immediate = I; \
+  ((word_metadata*)dp->p)->hidden = H; \
+  sprintf(((word_metadata*)dp->p)->name, N); \
   dp++
 
 #define VERSION_MAJOR 0 /* not backward compatible */
 #define VERSION_MINOR 0 /* backward compatible */
 
-typedef void *cell_t;
+typedef union {
+  intptr_t i;
+  void *p;
+} cell_t;
 
 typedef struct {
   unsigned int immediate : 1;
@@ -34,12 +37,12 @@ void die(const char *message)
   exit(EXIT_FAILURE);
 }
 
-void clean_metadata(cell_t dictionary, cell_t * top) {
-  do {
-    free(*(top+1)); 
-    top = *top;
-  } while (top!=dictionary);
-}
+/* void clean_metadata(cell_t dictionary, cell_t * top) { */
+/*   do { */
+/*     free((top+1)->p); */ 
+/*     top.p = top->p; */
+/*   } while (top!=dictionary); */
+/* } */
 
 int main(int argc, const char *argv[])
 {
@@ -75,7 +78,7 @@ int main(int argc, const char *argv[])
   HEADER("!",1,0,0); *dp++ = &&STORE;
   /* +! -! c@ c! c@c! cmove */
   
-  HEADER("state",5,0,0); *dp++ = &&DOVAR; *dp++ = 0;
+  HEADER("state",5,0,0); *dp++ = &&DOVAR; (dp->i)++ = 0;
 
   HEADER("VERSION_MAJOR",13,0,0); *dp++ = &&LIT; *dp++ = VERSION_MAJOR;
   HEADER("VERSION_MINOR",13,0,0); *dp++ = &&LIT; *dp++ = VERSION_MINOR;
@@ -150,7 +153,7 @@ SHOW_STACK:
   NEXT;
 QUIT:
   puts("bye");
-  clean_metadata(dictionary, link);
+  /* clean_metadata(dictionary, link); */
   
   return 0;
 }
