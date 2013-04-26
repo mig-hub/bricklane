@@ -88,7 +88,7 @@ int main(int argc, const char *argv[])
   /* dsp@ dsp! */
   
   sp++->i = 3; sp++->i = 7; sp++->i = 2;
-  dp++->p = &&DIVMOD;
+  dp++->p = &&MULTIPLY;
   dp++->p = &&SHOW_STACK; 
   dp++->p = &&QUIT;
   ip = (dp-3);
@@ -128,11 +128,11 @@ INCREMENT:
 DECREMENT:
   (sp-1)->i -= 1; NEXT;
 PLUS:
-  (sp-2)->i += (sp-1)->i; sp--; NEXT; /* test *((sp--)-1) */
+  ((sp--)-2)->i += (sp-1)->i; NEXT; /* test *((sp--)-1) */
 MINUS:
-  (sp-2)->i -= (sp-1)->i; sp--; NEXT; /* test *((sp--)-1) */
+  ((sp--)-2)->i -= (sp-1)->i; NEXT; /* test *((sp--)-1) */
 MULTIPLY:
-  (sp-2)->i *= (sp-1)->i; sp--; NEXT; /* test *((sp--)-1) */
+  ((sp--)-2)->i *= (sp-1)->i; NEXT; /* test *((sp--)-1) */
 DIVMOD:
   divmod_result = div((sp-2)->i, (sp-1)->i);
   (sp-2)->i = divmod_result.quot;
