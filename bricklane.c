@@ -88,7 +88,7 @@ int main(int argc, const char *argv[])
   /* dsp@ dsp! */
   
   sp++->i = 3; sp++->i = 7; sp++->i = 2;
-  dp++->p = &&MULTIPLY;
+  dp++->p = &&VERSION_MAJOR;
   dp++->p = &&SHOW_STACK; 
   dp++->p = &&QUIT;
   ip = (dp-3);
