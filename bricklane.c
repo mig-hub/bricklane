@@ -84,16 +84,22 @@ int main(int argc, const char *argv[])
   /* dsp@ dsp! */
   
   sp++->i = 3; sp++->i = 7; sp++->i = 2;
-  dp++->p = &&MULTIPLY;
+  dp++->p = &&DOVAR; dp++->i = -45;
   dp++->p = &&SHOW_STACK; 
   dp++->p = &&QUIT;
-  ip = (dp-3);
+  ip = (dp-4);
   NEXT;
 
 DOCOL:
   rp++->p = ip++; NEXT;
 END:
   ip = --rp->p; NEXT;
+LIT:
+  *sp++ = *ip++; NEXT;
+FETCH:
+  /* *(sp-1) = (cell_t)*(*(sp-1)); NEXT; */
+STORE:
+  /* (cell_t)**(sp-1) = *((sp--)-2); NEXT; */
 DOVAR:
   sp++->p = ip++; NEXT;
 DROP:
@@ -134,12 +140,6 @@ DIVMOD:
   (sp-2)->i = divmod_result.quot;
   (sp-1)->i = divmod_result.rem;
   NEXT;
-LIT:
-  *sp++ = *ip++; NEXT;
-FETCH:
-  /* *(sp-1) = (cell_t)*(*(sp-1)); NEXT; */
-STORE:
-  /* (cell_t)**(sp-1) = *((sp--)-2); NEXT; */
 SHOW_STACK:
   fprintf(stdout, "( ");
   for (temp_p = stack; temp_p < sp; temp_p++) {
