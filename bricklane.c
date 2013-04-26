@@ -37,12 +37,12 @@ void die(const char *message)
   exit(EXIT_FAILURE);
 }
 
-/* void clean_metadata(cell_t dictionary, cell_t * top) { */
-/*   do { */
-/*     free((top+1)->p); */ 
-/*     top.p = top->p; */
-/*   } while (top!=dictionary); */
-/* } */
+void clean_metadata(cell_t * begining, cell_t * top) {
+  do {
+    free((top+1)->p); 
+    top = top->p;
+  } while (top!=begining);
+}
 
 int main(int argc, const char *argv[])
 {
@@ -153,7 +153,7 @@ SHOW_STACK:
   NEXT;
 QUIT:
   puts("bye");
-  /* clean_metadata(dictionary, link); */
+  clean_metadata(dictionary, link);
   
   return 0;
 }
