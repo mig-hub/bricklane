@@ -128,15 +128,15 @@ INCREMENT:
 DECREMENT:
   (sp-1)->i -= 1; NEXT;
 PLUS:
-  *(sp-2) += *(sp-1); sp--; NEXT; /* test *((sp--)-1) */
+  (sp-2)->i += (sp-1)->i; sp--; NEXT; /* test *((sp--)-1) */
 MINUS:
-  *(sp-2) -= (intptr_t)*(sp-1); sp--; NEXT; /* test *((sp--)-1) */
+  (sp-2)->i -= (sp-1)->i; sp--; NEXT; /* test *((sp--)-1) */
 MULTIPLY:
-  *(sp-2) = (cell_t)((intptr_t)*(sp-1) * (intptr_t)*(sp-2)); sp--; NEXT; /* test *((sp--)-1) */
+  (sp-2)->i *= (sp-1)->i; sp--; NEXT; /* test *((sp--)-1) */
 DIVMOD:
-  divmod_result = div((intptr_t)*(sp-2), (intptr_t)*(sp-1));
-  *(sp-2) = (cell_t)divmod_result.quot;
-  *(sp-1) = (cell_t)divmod_result.rem;
+  divmod_result = div((sp-2)->i, (sp-1)->i);
+  (sp-2)->i = divmod_result.quot;
+  (sp-1)->i = divmod_result.rem;
   NEXT;
 LIT:
   *sp++ = *ip++; NEXT;
