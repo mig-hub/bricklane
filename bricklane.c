@@ -46,14 +46,10 @@ void clean_metadata(cell_t * begining, cell_t * top) {
 
 int main(int argc, const char *argv[])
 {
-  cell_t stack[STACK_SIZE];
-  cell_t *sp = stack;
-  cell_t return_stack[RETURN_STACK_SIZE];
-  cell_t *rp = return_stack;
-  cell_t *ip;
-  cell_t dictionary[IMAGE_SIZE], *dp = dictionary;
-  cell_t *link = NULL;
-  cell_t temp; cell_t *temp_p;
+  cell_t stack[STACK_SIZE], *sp = stack;
+  cell_t return_stack[RETURN_STACK_SIZE], *rp = return_stack;
+  cell_t dictionary[IMAGE_SIZE], *dp = dictionary, *link = NULL, *ip;
+  cell_t temp, *temp_p;
   div_t divmod_result;
   
   HEADER("show-stack",10,0,0); dp++->p = &&SHOW_STACK;
@@ -88,7 +84,7 @@ int main(int argc, const char *argv[])
   /* dsp@ dsp! */
   
   sp++->i = 3; sp++->i = 7; sp++->i = 2;
-  dp++->p = &&VERSION_MAJOR;
+  dp++->p = &&MULTIPLY;
   dp++->p = &&SHOW_STACK; 
   dp++->p = &&QUIT;
   ip = (dp-3);
@@ -128,11 +124,11 @@ INCREMENT:
 DECREMENT:
   (sp-1)->i -= 1; NEXT;
 PLUS:
-  ((sp--)-2)->i += (sp-1)->i; NEXT; /* test *((sp--)-1) */
+  ((sp--)-2)->i += (sp-1)->i; NEXT;
 MINUS:
-  ((sp--)-2)->i -= (sp-1)->i; NEXT; /* test *((sp--)-1) */
+  ((sp--)-2)->i -= (sp-1)->i; NEXT;
 MULTIPLY:
-  ((sp--)-2)->i *= (sp-1)->i; NEXT; /* test *((sp--)-1) */
+  ((sp--)-2)->i *= (sp-1)->i; NEXT;
 DIVMOD:
   divmod_result = div((sp-2)->i, (sp-1)->i);
   (sp-2)->i = divmod_result.quot;
