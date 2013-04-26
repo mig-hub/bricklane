@@ -6,7 +6,7 @@
 #define RETURN_STACK_SIZE 8192
 #define WORD_SIZE 32
 #define BUFFER_SIZE 4096
-#define NEXT goto **ip++
+#define NEXT goto *ip++->p
 #define CELL_SIZE (sizeof(void*))
 #define HEADER(N,L,I,H) dp->p = link; link = dp++; \
   dp->p = (word_metadata *)malloc(sizeof(word_metadata)); \
@@ -56,50 +56,50 @@ int main(int argc, const char *argv[])
   cell_t temp; cell_t *temp_p;
   div_t divmod_result;
   
-  HEADER("show-stack",10,0,0); *dp++ = &&SHOW_STACK;
-  HEADER("drop",4,0,0); *dp++ = &&DROP;
-  HEADER("swap",4,0,0); *dp++ = &&SWAP;
-  HEADER("dup",3,0,0); *dp++ = &&DUP;
-  HEADER("over",4,0,0); *dp++ = &&OVER;
-  HEADER("dig",3,0,0); *dp++ = &&DIG;
-  HEADER("bury",4,0,0); *dp++ = &&BURY;
-  HEADER("quit",4,0,0); *dp++ = &&QUIT;
+  HEADER("show-stack",10,0,0); dp++->p = &&SHOW_STACK;
+  HEADER("drop",4,0,0); dp++->p = &&DROP;
+  HEADER("swap",4,0,0); dp++->p = &&SWAP;
+  HEADER("dup",3,0,0); dp++->p = &&DUP;
+  HEADER("over",4,0,0); dp++->p = &&OVER;
+  HEADER("dig",3,0,0); dp++->p = &&DIG;
+  HEADER("bury",4,0,0); dp++->p = &&BURY;
+  HEADER("quit",4,0,0); dp++->p = &&QUIT;
   /* 2drop 2dup 2swap ?dup */
-  HEADER("1+",2,0,0); *dp++ = &&INCREMENT;
-  HEADER("1-",2,0,0); *dp++ = &&DECREMENT;
-  HEADER("+",1,0,0); *dp++ = &&PLUS;
-  HEADER("-",1,0,0); *dp++ = &&MINUS;
-  HEADER("*",1,0,0); *dp++ = &&MULTIPLY;
-  HEADER("/mod",4,0,0); *dp++ = &&DIVMOD;
+  HEADER("1+",2,0,0); dp++->p = &&INCREMENT;
+  HEADER("1-",2,0,0); dp++->p = &&DECREMENT;
+  HEADER("+",1,0,0); dp++->p = &&PLUS;
+  HEADER("-",1,0,0); dp++->p = &&MINUS;
+  HEADER("*",1,0,0); dp++->p = &&MULTIPLY;
+  HEADER("/mod",4,0,0); dp++->p = &&DIVMOD;
   /* u/mod */
-  HEADER("end",3,0,0); *dp++ = &&END;
-  HEADER("lit:",4,0,0); *dp++ = &&LIT;
-  HEADER("@",1,0,0); *dp++ = &&FETCH;
-  HEADER("!",1,0,0); *dp++ = &&STORE;
+  HEADER("end",3,0,0); dp++->p = &&END;
+  HEADER("lit:",4,0,0); dp++->p = &&LIT;
+  HEADER("@",1,0,0); dp++->p = &&FETCH;
+  HEADER("!",1,0,0); dp++->p = &&STORE;
   /* +! -! c@ c! c@c! cmove */
   
-  HEADER("state",5,0,0); *dp++ = &&DOVAR; (dp->i)++ = 0;
+  HEADER("state",5,0,0); dp++->p = &&DOVAR; dp++->i = 0;
 
-  HEADER("VERSION_MAJOR",13,0,0); *dp++ = &&LIT; *dp++ = VERSION_MAJOR;
-  HEADER("VERSION_MINOR",13,0,0); *dp++ = &&LIT; *dp++ = VERSION_MINOR;
-  HEADER("DOCOL",5,0,0); *dp++ = &&LIT; *dp++ = &&DOCOL;
+  HEADER("VERSION_MAJOR",13,0,0); dp++->p = &&LIT; dp++->i = VERSION_MAJOR;
+  HEADER("VERSION_MINOR",13,0,0); dp++->p = &&LIT; dp++->i = VERSION_MINOR;
+  HEADER("DOCOL",5,0,0); dp++->p = &&LIT; dp++->p = &&DOCOL;
 
   /* >r r> rsp@ rsp! rdrop */
   /* dsp@ dsp! */
   
-  *sp++ = (cell_t)3; *sp++ = (cell_t)7; *sp++ = (cell_t)2;
-  *dp++ = &&DIVMOD;
-  *dp++ = &&SHOW_STACK; 
-  *dp++ = &&QUIT;
+  sp++->i = 3; sp++->i = 7; sp++->i = 2;
+  dp++->p = &&DIVMOD;
+  dp++->p = &&SHOW_STACK; 
+  dp++->p = &&QUIT;
   ip = (dp-3);
   NEXT;
 
 DOCOL:
-  *rp++ = ip++; NEXT;
+  rp++->p = ip++; NEXT;
 END:
-  ip = *--rp; NEXT;
+  ip = --rp->p; NEXT;
 DOVAR:
-  *sp++ = ip++; NEXT;
+  sp++->p = ip++; NEXT;
 DROP:
   sp--; NEXT;
 SWAP:
@@ -124,11 +124,11 @@ BURY:
   *(sp-3) = temp;
   NEXT;
 INCREMENT:
-  *(sp-1) += 1; NEXT;
+  (sp-1)->i += 1; NEXT;
 DECREMENT:
-  *(sp-1) -= 1; NEXT;
+  (sp-1)->i -= 1; NEXT;
 PLUS:
-  *(sp-2) += (intptr_t)*(sp-1); sp--; NEXT; /* test *((sp--)-1) */
+  *(sp-2) += *(sp-1); sp--; NEXT; /* test *((sp--)-1) */
 MINUS:
   *(sp-2) -= (intptr_t)*(sp-1); sp--; NEXT; /* test *((sp--)-1) */
 MULTIPLY:
@@ -145,11 +145,11 @@ FETCH:
 STORE:
   /* (cell_t)**(sp-1) = *((sp--)-2); NEXT; */
 SHOW_STACK:
-  fprintf(stdout, "[ ");
+  fprintf(stdout, "( ");
   for (temp_p = stack; temp_p < sp; temp_p++) {
-    fprintf(stdout, "%ld ", (intptr_t)*temp_p);
+    fprintf(stdout, "%ld ", temp_p->i);
   }
-  fprintf(stdout, "]\n");
+  fprintf(stdout, ")\n");
   NEXT;
 QUIT:
   puts("bye");
