@@ -82,12 +82,13 @@ int main(int argc, const char *argv[])
 
   /* >r r> rsp@ rsp! rdrop */
   /* dsp@ dsp! */
-  
+  intptr_t dummy = 2066; 
   sp++->i = 3; sp++->i = 7; sp++->i = 2;
-  dp++->p = &&DOVAR; dp++->i = -45;
+  dp++->p = &&LIT; dp++->p = &dummy;
+  dp++->p = &&STORE;
   dp++->p = &&SHOW_STACK; 
   dp++->p = &&QUIT;
-  ip = (dp-4);
+  ip = (dp-5);
   NEXT;
 
 DOCOL:
@@ -97,9 +98,9 @@ END:
 LIT:
   *sp++ = *ip++; NEXT;
 FETCH:
-  /* *(sp-1) = (cell_t)*(*(sp-1)); NEXT; */
+  *(sp-1) = *(cell_t*)(sp-1)->p; NEXT;
 STORE:
-  /* (cell_t)**(sp-1) = *((sp--)-2); NEXT; */
+  *(cell_t*)(sp-1)->p = *(sp-2); sp -= 2; NEXT;
 DOVAR:
   sp++->p = ip++; NEXT;
 DROP:
