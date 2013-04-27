@@ -91,29 +91,20 @@ int main(int argc, const char *argv[])
   ip = (dp-5);
   NEXT;
 
-DOCOL:
-  rp++->p = ip++; NEXT;
-END:
-  ip = --rp->p; NEXT;
-LIT:
-  *sp++ = *ip++; NEXT;
-FETCH:
-  *(sp-1) = *(cell_t*)(sp-1)->p; NEXT;
-STORE:
-  *(cell_t*)(sp-1)->p = *(sp-2); sp -= 2; NEXT;
-DOVAR:
-  sp++->p = ip++; NEXT;
-DROP:
-  sp--; NEXT;
+DOCOL: rp++->p = ip++; NEXT;
+END: ip = --rp->p; NEXT;
+LIT: *sp++ = *ip++; NEXT;
+FETCH: *(sp-1) = *(cell_t*)(sp-1)->p; NEXT;
+STORE: *(cell_t*)(sp-1)->p = *(sp-2); sp -= 2; NEXT;
+DOVAR: sp++->p = ip++; NEXT;
+DROP: sp--; NEXT;
 SWAP:
   temp = *(sp-1);
   *(sp-1) = *(sp-2);
   *(sp-2) = temp;
   NEXT;
-DUP:
-  *sp++ = *(sp-1); NEXT;
-OVER:
-  *sp++ = *(sp-2); NEXT;
+DUP: *sp++ = *(sp-1); NEXT;
+OVER: *sp++ = *(sp-2); NEXT;
 DIG:
   temp = *(sp-3);
   *(sp-3) = *(sp-2);
@@ -126,16 +117,11 @@ BURY:
   *(sp-2) = *(sp-3);
   *(sp-3) = temp;
   NEXT;
-INCREMENT:
-  (sp-1)->i += 1; NEXT;
-DECREMENT:
-  (sp-1)->i -= 1; NEXT;
-PLUS:
-  ((sp--)-2)->i += (sp-1)->i; NEXT;
-MINUS:
-  ((sp--)-2)->i -= (sp-1)->i; NEXT;
-MULTIPLY:
-  ((sp--)-2)->i *= (sp-1)->i; NEXT;
+INCREMENT: (sp-1)->i += 1; NEXT;
+DECREMENT: (sp-1)->i -= 1; NEXT;
+PLUS: ((sp--)-2)->i += (sp-1)->i; NEXT;
+MINUS: ((sp--)-2)->i -= (sp-1)->i; NEXT;
+MULTIPLY: ((sp--)-2)->i *= (sp-1)->i; NEXT;
 DIVMOD:
   divmod_result = div((sp-2)->i, (sp-1)->i);
   (sp-2)->i = divmod_result.quot;
