@@ -83,12 +83,11 @@ int main(int argc, const char *argv[])
   /* >r r> rsp@ rsp! rdrop */
   /* dsp@ dsp! */
   intptr_t dummy = 2066; 
-  sp++->i = 3; sp++->i = 7; sp++->i = 2;
-  dp++->p = &&LIT; dp++->p = &dummy;
-  dp++->p = &&STORE;
+  sp++->i = 3; sp++->i = 7; sp++->i = 64;
+  dp++->p = &&KEY;
   dp++->p = &&SHOW_STACK; 
   dp++->p = &&QUIT;
-  ip = (dp-5);
+  ip = (dp-3);
   NEXT;
 
 DOCOL: rp++->p = ip++; NEXT;
@@ -127,6 +126,8 @@ DIVMOD:
   (sp-2)->i = divmod_result.quot;
   (sp-1)->i = divmod_result.rem;
   NEXT;
+KEY: sp++->i = getchar(); NEXT;
+EMIT: putchar(((sp--)-1)->i); NEXT;
 SHOW_STACK:
   fprintf(stdout, "( ");
   for (temp_p = stack; temp_p < sp; temp_p++) {
