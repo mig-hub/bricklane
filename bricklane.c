@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #define IMAGE_SIZE 65536
 #define STACK_SIZE 64
@@ -49,7 +50,9 @@ int main(int argc, const char *argv[])
   cell_t stack[STACK_SIZE], *sp = stack;
   cell_t return_stack[RETURN_STACK_SIZE], *rp = return_stack;
   cell_t dictionary[IMAGE_SIZE], *dp = dictionary, *link = NULL, *ip;
+  char word_buffer[WORD_SIZE], *word_p = word_buffer;
   cell_t temp, *temp_p;
+  char temp_char;
   div_t divmod_result;
   
   HEADER("show-stack",10,0,0); dp++->p = &&SHOW_STACK;
@@ -73,6 +76,8 @@ int main(int argc, const char *argv[])
   HEADER("@",1,0,0); dp++->p = &&FETCH;
   HEADER("!",1,0,0); dp++->p = &&STORE;
   /* +! -! c@ c! c@c! cmove */
+  HEADER("key",3,0,0); dp++->p = &&KEY;
+  HEADER("emit",4,0,0); dp++->p = &&EMIT;
   
   HEADER("state",5,0,0); dp++->p = &&DOVAR; dp++->i = 0;
 
@@ -81,10 +86,9 @@ int main(int argc, const char *argv[])
   HEADER("DOCOL",5,0,0); dp++->p = &&LIT; dp++->p = &&DOCOL;
 
   /* >r r> rsp@ rsp! rdrop */
-  /* dsp@ dsp! */
-  intptr_t dummy = 2066; 
+  /* dsp@ dsp! */ 
   sp++->i = 3; sp++->i = 7; sp++->i = 64;
-  dp++->p = &&KEY;
+  dp++->p = &&WORD;
   dp++->p = &&SHOW_STACK; 
   dp++->p = &&QUIT;
   ip = (dp-3);
@@ -128,6 +132,19 @@ DIVMOD:
   NEXT;
 KEY: sp++->i = getchar(); NEXT;
 EMIT: putchar(((sp--)-1)->i); NEXT;
+WORD:
+  word_p = word_buffer;
+  temp_char = getchar();
+  while(isspace(temp_char)) {
+    temp_char = getchar();
+  }
+  while(!isspace(temp_char)) {
+    *word_p++ = temp_char;
+    temp_char = getchar();
+  }
+  sp++->p = word_buffer;
+  sp++->i = word_p - word_buffer;
+  NEXT;
 SHOW_STACK:
   fprintf(stdout, "( ");
   for (temp_p = stack; temp_p < sp; temp_p++) {
