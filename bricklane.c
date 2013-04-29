@@ -50,6 +50,7 @@ int main(int argc, const char *argv[])
   cell_t stack[STACK_SIZE], *sp = stack;
   cell_t return_stack[RETURN_STACK_SIZE], *rp = return_stack;
   cell_t dictionary[IMAGE_SIZE], *dp = dictionary, *link = NULL, *ip;
+  char base = 10, state = 0;
   char word_buffer[WORD_SIZE], *word_p = word_buffer;
   cell_t temp, *temp_p;
   char temp_char;
@@ -79,7 +80,8 @@ int main(int argc, const char *argv[])
   HEADER("key",3,0,0); dp++->p = &&KEY;
   HEADER("emit",4,0,0); dp++->p = &&EMIT;
   
-  HEADER("state",5,0,0); dp++->p = &&DOVAR; dp++->i = 0;
+  HEADER("state",5,0,0); dp++->p = &&LIT; dp++->p = &state;
+  HEADER("base",4,0,0); dp++->p = &&LIT; dp++->p = &base;
 
   HEADER("VERSION_MAJOR",13,0,0); dp++->p = &&LIT; dp++->i = VERSION_MAJOR;
   HEADER("VERSION_MINOR",13,0,0); dp++->p = &&LIT; dp++->i = VERSION_MINOR;
@@ -87,7 +89,7 @@ int main(int argc, const char *argv[])
 
   /* >r r> rsp@ rsp! rdrop */
   /* dsp@ dsp! */ 
-  sp++->i = 3; sp++->i = 7; sp++->i = 64;
+  sp++->i = 3; sp++->i = 7; sp++->i = 2;
   dp++->p = &&WORD;
   dp++->p = &&SHOW_STACK; 
   dp++->p = &&QUIT;
