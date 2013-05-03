@@ -79,7 +79,7 @@ int main(int argc, const char *argv[])
   /* +! -! c@ c! c@c! cmove */
   HEADER("key",3,0,0); dp++->p = &&KEY;
   HEADER("emit",4,0,0); dp++->p = &&EMIT;
-  HEADER("word",4,0,0); dp++->p = &&WORD;
+  HEADER("word:",5,0,0); dp++->p = &&WORD;
   HEADER("number",6,0,0); dp++->p = &&NUMBER;
   
   HEADER("state",5,0,0); dp++->p = &&LIT; dp++->p = &state;
@@ -88,6 +88,8 @@ int main(int argc, const char *argv[])
   HEADER("VERSION_MAJOR",13,0,0); dp++->p = &&LIT; dp++->i = VERSION_MAJOR;
   HEADER("VERSION_MINOR",13,0,0); dp++->p = &&LIT; dp++->i = VERSION_MINOR;
   HEADER("DOCOL",5,0,0); dp++->p = &&LIT; dp++->p = &&DOCOL;
+  HEADER("YES",3,0,0); dp++->p = &&LIT; dp++->i = -1;
+  HEADER("NO",2,0,0); dp++->p = &&LIT; dp++->i = 0;
 
   /* >r r> rsp@ rsp! rdrop */
   /* dsp@ dsp! */ 
