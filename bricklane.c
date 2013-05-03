@@ -53,7 +53,7 @@ int main(int argc, const char *argv[])
   char base = 10, state = 0;
   char word_buffer[WORD_SIZE], *word_p = word_buffer;
   cell_t temp, *temp_p;
-  char temp_char;
+  char temp_char, *end;
   div_t divmod_result;
   
   HEADER("show-stack",10,0,0); dp++->p = &&SHOW_STACK;
@@ -79,6 +79,8 @@ int main(int argc, const char *argv[])
   /* +! -! c@ c! c@c! cmove */
   HEADER("key",3,0,0); dp++->p = &&KEY;
   HEADER("emit",4,0,0); dp++->p = &&EMIT;
+  HEADER("word",4,0,0); dp++->p = &&WORD;
+  HEADER("number",6,0,0); dp++->p = &&NUMBER;
   
   HEADER("state",5,0,0); dp++->p = &&LIT; dp++->p = &state;
   HEADER("base",4,0,0); dp++->p = &&LIT; dp++->p = &base;
@@ -90,10 +92,10 @@ int main(int argc, const char *argv[])
   /* >r r> rsp@ rsp! rdrop */
   /* dsp@ dsp! */ 
   sp++->i = 3; sp++->i = 7; sp++->i = 2;
-  dp++->p = &&WORD;
+  dp++->p = &&WORD; dp++->p = &&NUMBER;
   dp++->p = &&SHOW_STACK; 
   dp++->p = &&QUIT;
-  ip = (dp-3);
+  ip = (dp-4);
   NEXT;
 
 DOCOL: rp++->p = ip++; NEXT;
@@ -144,9 +146,14 @@ WORD:
     *word_p++ = temp_char;
     temp_char = getchar();
   }
+  *word_p++ = '\0'; /* only while I use std lib */
   sp++->p = word_buffer;
   sp++->i = word_p - word_buffer;
   NEXT;
+NUMBER:
+  sp--;
+  sp++->i = strtol((--sp)->p, &end, base);
+  sp++->i = (!*end) ? -1 : 0;
 SHOW_STACK:
   fprintf(stdout, "( ");
   for (temp_p = stack; temp_p < sp; temp_p++) {
