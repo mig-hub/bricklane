@@ -49,7 +49,11 @@ int main(int argc, const char *argv[])
   PRIMITIVE("unnest",6,0,0,&&UNNEST);
   PRIMITIVE("bye",3,0,0,&&BYE);
   PRIMITIVE("debug",5,0,0,&&DEBUG);
-  DICT(dp-1); DICT(dp-5);
+
+  // Fake compiled word which does debug twice
+  DICT(&&NEST); DICT(dp-2); DICT(dp-3); DICT(dp-10);
+
+  DICT(dp-4); DICT(dp-9); // double-debug bye
   ip = dp-2;
   NEXT;
 
