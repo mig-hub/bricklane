@@ -1,30 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #define IMAGE_SIZE 65536
 #define STACK_SIZE 64
 #define RETURN_STACK_SIZE 8192
 #define WORD_SIZE 32
 #define BUFFER_SIZE 4096
-#define NEXT goto *ip++->p
+#define NEXT w = *ip++; goto **w++
 #define CELL_SIZE (sizeof(cell_t))
-#define HEADER(N,L,I,H) dp->p = link; link = dp++; \
-  dp->p = (word_metadata *)malloc(sizeof(word_metadata)); \
-  ((word_metadata*)dp->p)->length = L; \
-  ((word_metadata*)dp->p)->immediate = I; \
-  ((word_metadata*)dp->p)->hidden = H; \
-  strcpy(((word_metadata*)dp->p)->name, N); \
+#define HEADER(N,L,I,H) *dp = link; link = dp++; \
+  *dp = (word_metadata *)malloc(sizeof(word_metadata)); \
+  ((word_metadata*)*dp)->length = L; \
+  ((word_metadata*)*dp)->immediate = I; \
+  ((word_metadata*)*dp)->hidden = H; \
+  strcpy(((word_metadata*)*dp)->name, N); \
   dp++
-#define DICT(V) dp++->p = V
-#define DICT_I(V) dp++->i = V
+#define DICT(V) *dp++ = V
 #define PRIMITIVE(N,L,I,H,A) HEADER(N,L,I,H); DICT(A)
 
-typedef union {
-  intptr_t i;
-  void *p;
-} cell_t;
+typedef void* cell_t;
 
 typedef struct {
   unsigned int immediate : 1;
@@ -33,16 +28,10 @@ typedef struct {
   char name[WORD_SIZE];
 } word_metadata;
 
-void die(const char *message)
-{
-  fprintf(stderr, "FATAL: %s\n", message);
-  exit(EXIT_FAILURE);
-}
-
 void clean_metadata(cell_t * begining, cell_t * top) {
   do {
-    free((top+1)->p); 
-    top = top->p;
+    free(*(top+1)); 
+    top = *top;
   } while (top!=begining);
 }
 
@@ -50,158 +39,25 @@ int main(int argc, const char *argv[])
 {
   cell_t stack[STACK_SIZE], *sp = stack;
   cell_t return_stack[RETURN_STACK_SIZE], *rp = return_stack;
-  cell_t dictionary[IMAGE_SIZE], *dp = dictionary, *link = NULL, *ip;
+  cell_t dictionary[IMAGE_SIZE], *dp = dictionary, *link = NULL, *ip, *w;
   char base = 10, state = 0;
   char word_buffer[WORD_SIZE], *word_p = word_buffer;
   cell_t temp, *temp_p;
   char temp_char, *end;
   div_t divmod_result;
-  
-  HEADER("YES",3,0,0); DICT(&&LIT); DICT_I(-1);
-  HEADER("NO",2,0,0); DICT(&&LIT); DICT_I(0);
 
-  HEADER("state",5,0,0); DICT(&&LIT); DICT(&state);
-  HEADER("base",4,0,0); DICT(&&LIT); DICT(&base);
-
-  PRIMITIVE("show-stack",10,0,0,&&SHOW_STACK);
-  PRIMITIVE("drop",4,0,0,&&DROP);
-  PRIMITIVE("swap",4,0,0,&&SWAP);
-  PRIMITIVE("dup",3,0,0,&&DUP);
-  PRIMITIVE("over",4,0,0,&&OVER);
-  PRIMITIVE("dig",3,0,0,&&DIG);
-  PRIMITIVE("bury",4,0,0,&&BURY);
-  /* 2drop 2dup 2swap ?dup */
-  PRIMITIVE("1+",2,0,0,&&INCREMENT);
-  PRIMITIVE("1-",2,0,0,&&DECREMENT);
-  PRIMITIVE("+",1,0,0,&&PLUS);
-  PRIMITIVE("-",1,0,0,&&MINUS);
-  PRIMITIVE("*",1,0,0,&&MULTIPLY);
-  PRIMITIVE("/mod",4,0,0,&&DIVMOD);
-  /* u/mod */
-  PRIMITIVE("nest",4,0,0,&&NEST);
   PRIMITIVE("unnest",6,0,0,&&UNNEST);
-  PRIMITIVE("lit:",4,0,0,&&LIT);
-  PRIMITIVE("@",1,0,0,&&FETCH);
-  PRIMITIVE("!",1,0,0,&&STORE);
-  /* +! -! c@ c! c@c! cmove */
-  PRIMITIVE("key",3,0,0,&&KEY);
-  PRIMITIVE("emit",4,0,0,&&EMIT);
-  PRIMITIVE("word:",5,0,0,&&WORD);
-  PRIMITIVE("number",6,0,0,&&NUMBER);
-  PRIMITIVE("find",4,0,0,&&FIND);
-  PRIMITIVE("code-field",10,0,0,&&CODE_FIELD);
-  PRIMITIVE("create",6,0,0,&&CREATE);
-  PRIMITIVE(",",1,0,0,&&COMMA);
-  PRIMITIVE("[",1,1,0,&&STOP_COMPILER);
-  PRIMITIVE("]",1,0,0,&&START_COMPILER);
-  PRIMITIVE("jump",4,0,0,&&JUMP);
   PRIMITIVE("bye",3,0,0,&&BYE);
-  PRIMITIVE("quit",4,0,0,&&QUIT);
-  
-  /* >r r> rsp@ rsp! rdrop */
-  /* dsp@ dsp! */ 
+  PRIMITIVE("debug",5,0,0,&&DEBUG);
+  DICT(dp-1); DICT(dp-5);
+  ip = dp-2;
+  NEXT;
 
-  HEADER("interpret",9,0,0); 
-  DICT(&&NEST);
-  DICT(&&WORD); DICT(&&SHOW_STACK); DICT(&&UNNEST);
-  //DICT(&&WORD); DICT(&&FIND);
-  //DICT(&&CODE_FIELD); DICT(&&EXECUTE);
-
-  HEADER("reset",5,0,0); DICT(&&NEST);
-  DICT(dp-7);
-  DICT(&&SHOW_STACK); DICT(&&DEBUG); DICT(&&BYE); //DICT(&&JUMP); DICT_I(-2);
-
-  ip = (dp-5);
-  NEXT;
-DEBUG: puts("y"); NEXT;
-NEST: rp++->p = ip; NEXT;
-UNNEST: ip = --rp->p; NEXT;
-LIT: *sp++ = *ip++; NEXT;
-FETCH: *(sp-1) = *(cell_t*)(sp-1)->p; NEXT;
-STORE: *(cell_t*)(sp-1)->p = *(sp-2); sp -= 2; NEXT;
-DOVAR: sp++->p = ip++; NEXT;
-DROP: sp--; NEXT;
-SWAP:
-  temp = *(sp-1);
-  *(sp-1) = *(sp-2);
-  *(sp-2) = temp;
-  NEXT;
-DUP: *sp++ = *(sp-1); NEXT;
-OVER: *sp++ = *(sp-2); NEXT;
-DIG:
-  temp = *(sp-3);
-  *(sp-3) = *(sp-2);
-  *(sp-2) = *(sp-1);
-  *(sp-1) = temp;
-  NEXT;
-BURY:
-  temp = *(sp-1);
-  *(sp-1) = *(sp-2);
-  *(sp-2) = *(sp-3);
-  *(sp-3) = temp;
-  NEXT;
-INCREMENT: (sp-1)->i += 1; NEXT;
-DECREMENT: (sp-1)->i -= 1; NEXT;
-PLUS: ((sp--)-2)->i += (sp-1)->i; NEXT;
-MINUS: ((sp--)-2)->i -= (sp-1)->i; NEXT;
-MULTIPLY: ((sp--)-2)->i *= (sp-1)->i; NEXT;
-DIVMOD:
-  divmod_result = div((sp-2)->i, (sp-1)->i);
-  (sp-2)->i = divmod_result.quot;
-  (sp-1)->i = divmod_result.rem;
-  NEXT;
-KEY: sp++->i = getchar(); NEXT;
-EMIT: putchar(((sp--)-1)->i); NEXT;
-WORD:
-  word_p = word_buffer;
-  temp_char = getchar();
-  while(isspace(temp_char)) {
-    temp_char = getchar();
-  }
-  while(!isspace(temp_char)) {
-    *word_p++ = temp_char;
-    temp_char = getchar();
-  }
-  *word_p++ = '\0'; /* only while I use std lib */
-  sp++->p = word_buffer;
-  sp++->i = word_p - word_buffer;
-  NEXT;
-NUMBER:
-  sp--;
-  sp++->i = strtol((--sp)->p, &end, base);
-  sp++->i = (!*end) ? -1 : 0;
-  NEXT;
-FIND:
-  temp_p = link;
-  sp--; /* length not used while using std lib */
-  do {
-    if (strcmp((sp-1)->p, ((word_metadata*)(temp_p+1))->name)==0) {
-      (sp-1)->p = temp_p;
-      break;
-    }
-    temp_p = temp_p->p;
-  } while (temp_p!=dictionary);
-  NEXT;
-CODE_FIELD: (sp-1)->p += 2; NEXT;
-CREATE:
-  HEADER((char*)((sp-2)->p),(sp-1)->i,0,0);
-  sp -= 2;
-  NEXT;
-COMMA: *dp++ = *--sp; NEXT;
-START_COMPILER: state = 1; NEXT;
-STOP_COMPILER: state = 0; NEXT;
-JUMP: ip += ip->i; NEXT;
-EXECUTE: goto *--sp->p;
-SHOW_STACK:
-  fprintf(stdout, "( ");
-  for (temp_p = stack; temp_p < sp; temp_p++) {
-    fprintf(stdout, "%ld ", temp_p->i);
-  }
-  fprintf(stdout, ")\n");
-  NEXT;
+DEBUG: puts("debug"); NEXT;
+NEST: *rp++ = ip; ip = w; NEXT;
+UNNEST: ip = *--rp; NEXT;
 BYE: puts("bye");
-QUIT: clean_metadata(dictionary, link);
-  
+/* QUIT: clean_metadata(dictionary, link); */
   return 0;
 }
 
