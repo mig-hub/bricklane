@@ -61,7 +61,7 @@ DEBUG: puts("debug"); NEXT;
 NEST: *rp++ = ip; ip = w; NEXT;
 UNNEST: ip = *--rp; NEXT;
 BYE: puts("bye");
-/* QUIT: clean_metadata(dictionary, link); */
+QUIT: clean_metadata(dictionary, link);
   return 0;
 }
 
