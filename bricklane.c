@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define IMAGE_SIZE 65536
 #define STACK_SIZE 64
@@ -28,11 +29,17 @@ typedef struct {
   char name[WORD_SIZE];
 } word_metadata;
 
-void clean_metadata(cell_t * begining, cell_t * top) {
-  do {
-    free(*(top+1)); 
-    top = *top;
-  } while (top!=begining);
+void clean_metadata(cell_t *begining, cell_t *top) {
+  do { free(*(top+1)); top = *top; } while (top!=begining);
+}
+
+void show_stack(cell_t *stack, cell_t *sp) {
+  cell_t *temp_p;
+  fprintf(stdout, "( ");
+  for (temp_p = stack; temp_p < sp; temp_p++) {
+    fprintf(stdout, "%ld ", *(intptr_t*)temp_p);
+  }
+  fprintf(stdout, ")\n");
 }
 
 int main(int argc, const char *argv[])
@@ -46,20 +53,40 @@ int main(int argc, const char *argv[])
   char temp_char, *end;
   div_t divmod_result;
 
-  PRIMITIVE("unnest",6,0,0,&&UNNEST);
-  PRIMITIVE("bye",3,0,0,&&BYE);
   PRIMITIVE("debug",5,0,0,&&DEBUG);
+  PRIMITIVE("show-stack",10,0,0,&&SHOW_STACK);
+  PRIMITIVE("bye",3,0,0,&&BYE);
 
-  // Fake compiled word which does debug twice
-  DICT(&&NEST); DICT(dp-2); DICT(dp-3); DICT(dp-10);
+  PRIMITIVE("word:",5,0,0,&&WORD);
 
-  DICT(dp-4); DICT(dp-9); // double-debug bye
-  ip = dp-2;
+  PRIMITIVE("unnest",6,0,0,&&UNNEST);
+  HEADER("interpret:",10,0,0);
+  DICT(&&NEST); DICT(dp-7); DICT(dp-14); DICT(dp-12); // word: show-stack bye
+
+  ip = dp-3;
   NEXT;
 
 DEBUG: puts("debug"); NEXT;
+
 NEST: *rp++ = ip; ip = w; NEXT;
 UNNEST: ip = *--rp; NEXT;
+
+WORD:
+  word_p = word_buffer;
+  temp_char = getchar();
+  while(isspace(temp_char)) {
+    temp_char = getchar();
+  }
+  while(!isspace(temp_char)) {
+    *word_p++ = temp_char;
+    temp_char = getchar();
+  }
+  *word_p = '\0';
+  *sp++ = word_buffer;
+  *sp++ = (cell_t)(word_p - word_buffer);
+  NEXT;
+
+SHOW_STACK: show_stack(stack,sp); NEXT;
 BYE: puts("bye");
 QUIT: clean_metadata(dictionary, link);
   return 0;
