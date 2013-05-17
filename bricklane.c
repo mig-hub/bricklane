@@ -59,15 +59,15 @@ int main(int argc, const char *argv[])
 
   PRIMITIVE("word:",5,0,0,&&WORD);
   PRIMITIVE("find",4,0,0,&&FIND);
-
+  PRIMITIVE("token",5,0,0,&&TOKEN);
   PRIMITIVE("unnest",6,0,0,&&UNNEST);
   HEADER("interpret:",10,0,0);
-  DICT(&&NEST); DICT(dp-10); DICT(dp-8); DICT(dp-21); DICT(dp-16); // word: find debug bye
+  DICT(&&NEST); DICT(dp-13); DICT(dp-11); DICT(dp-9); DICT(dp-25); DICT(dp-20); // word: find token debug bye
 
-  ip = dp-4;
+  ip = dp-5;
   NEXT;
 
-DEBUG: printf("%p\n", *(sp-1)); printf("%p\n", dp-7); NEXT;
+DEBUG: printf("%p\n", *(sp-1)); printf("%p\n", dp-6); NEXT;
 
 NEST: *rp++ = ip; ip = w; NEXT;
 UNNEST: ip = *--rp; NEXT;
@@ -99,6 +99,7 @@ FIND:
   } while (temp_p!=dictionary);
   if (temp_p==dictionary) *(sp-1) = 0;
   NEXT;
+TOKEN: *(sp-1) += (CELL_SIZE*2);
 
 SHOW_STACK: show_stack(stack,sp); NEXT;
 BYE: puts("bye");
