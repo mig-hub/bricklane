@@ -29,8 +29,8 @@ typedef struct {
   char name[WORD_SIZE];
 } word_metadata;
 
-void clean_metadata(cell_t *begining, cell_t *top) {
-  do { free(*(top+1)); top = *top; } while (top!=begining);
+void clean_metadata(cell_t *top) {
+  while (top!=NULL) { free(*(top+1)); top = *top; };
 }
 
 void show_stack(cell_t *stack, cell_t *sp) {
@@ -60,14 +60,15 @@ int main(int argc, const char *argv[])
   PRIMITIVE("word:",5,0,0,&&WORD);
   PRIMITIVE("find",4,0,0,&&FIND);
   PRIMITIVE("token",5,0,0,&&TOKEN);
+  PRIMITIVE("execute",7,0,0,&&EXECUTE);
   PRIMITIVE("unnest",6,0,0,&&UNNEST);
   HEADER("interpret:",10,0,0);
-  DICT(&&NEST); DICT(dp-13); DICT(dp-11); DICT(dp-9); DICT(dp-25); DICT(dp-20); // word: find token debug bye
+  DICT(&&NEST); DICT(dp-16); DICT(dp-14); DICT(dp-12); DICT(dp-10); DICT(dp-23); // word: find token execute bye
 
   ip = dp-5;
   NEXT;
 
-DEBUG: printf("%p\n", *(sp-1)); printf("%p\n", dp-6); NEXT;
+DEBUG: puts("debug"); NEXT;
 
 NEST: *rp++ = ip; ip = w; NEXT;
 UNNEST: ip = *--rp; NEXT;
@@ -89,21 +90,22 @@ WORD:
 FIND:
   temp_p = link;
   sp--;
-  do {
+  while (temp_p!=NULL) {
     /* printf("%s\n", ((word_metadata*)*(temp_p+1))->name); */
     if (strcmp(*(sp-1), ((word_metadata*)*(temp_p+1))->name)==0) {
       *(sp-1) = temp_p;
       break;
     }
     temp_p = *temp_p;
-  } while (temp_p!=dictionary);
-  if (temp_p==dictionary) *(sp-1) = 0;
+  };
+  if (temp_p==NULL) *(sp-1) = 0;
   NEXT;
-TOKEN: *(sp-1) += (CELL_SIZE*2);
+TOKEN: *(sp-1) += (CELL_SIZE*2); NEXT;
+EXECUTE: w = *--sp; goto **w++;
 
 SHOW_STACK: show_stack(stack,sp); NEXT;
 BYE: puts("bye");
-QUIT: clean_metadata(dictionary, link);
+QUIT: clean_metadata(link);
   return 0;
 }
 
