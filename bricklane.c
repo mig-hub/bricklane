@@ -58,15 +58,16 @@ int main(int argc, const char *argv[])
   PRIMITIVE("bye",3,0,0,&&BYE);
 
   PRIMITIVE("word:",5,0,0,&&WORD);
+  PRIMITIVE("find",4,0,0,&&FIND);
 
   PRIMITIVE("unnest",6,0,0,&&UNNEST);
   HEADER("interpret:",10,0,0);
-  DICT(&&NEST); DICT(dp-7); DICT(dp-14); DICT(dp-12); // word: show-stack bye
+  DICT(&&NEST); DICT(dp-10); DICT(dp-8); DICT(dp-21); DICT(dp-16); // word: find debug bye
 
-  ip = dp-3;
+  ip = dp-4;
   NEXT;
 
-DEBUG: puts("debug"); NEXT;
+DEBUG: printf("%p\n", *(sp-1)); printf("%p\n", dp-7); NEXT;
 
 NEST: *rp++ = ip; ip = w; NEXT;
 UNNEST: ip = *--rp; NEXT;
@@ -84,6 +85,19 @@ WORD:
   *word_p = '\0';
   *sp++ = word_buffer;
   *sp++ = (cell_t)(word_p - word_buffer);
+  NEXT;
+FIND:
+  temp_p = link;
+  sp--;
+  do {
+    /* printf("%s\n", ((word_metadata*)*(temp_p+1))->name); */
+    if (strcmp(*(sp-1), ((word_metadata*)*(temp_p+1))->name)==0) {
+      *(sp-1) = temp_p;
+      break;
+    }
+    temp_p = *temp_p;
+  } while (temp_p!=dictionary);
+  if (temp_p==dictionary) *(sp-1) = 0;
   NEXT;
 
 SHOW_STACK: show_stack(stack,sp); NEXT;
