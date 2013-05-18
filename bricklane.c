@@ -62,10 +62,14 @@ int main(int argc, const char *argv[])
   PRIMITIVE("token",5,0,0,&&TOKEN);
   PRIMITIVE("execute",7,0,0,&&EXECUTE);
   PRIMITIVE("unnest",6,0,0,&&UNNEST);
-  HEADER("interpret:",10,0,0);
-  DICT(&&NEST); DICT(dp-16); DICT(dp-14); DICT(dp-12); DICT(dp-10); DICT(dp-23); // word: find token execute bye
+  HEADER("interpret:",10,0,0); // word: find token execute unnest
+  DICT(&&NEST); DICT(dp-16); DICT(dp-14);
+  DICT(dp-12); DICT(dp-10); DICT(dp-8);
+  PRIMITIVE("jump",4,0,0,&&JUMP);
+  HEADER("reset",5,0,0); // interpret: jump -2
+  DICT(&&NEST); DICT(dp-12); DICT(dp-5); DICT((cell_t)-2);
 
-  ip = dp-5;
+  ip = dp-3;
   NEXT;
 
 DEBUG: puts("debug"); NEXT;
@@ -100,8 +104,9 @@ FIND:
   };
   if (temp_p==NULL) *(sp-1) = 0;
   NEXT;
-TOKEN: *(sp-1) += (CELL_SIZE*2); NEXT;
+TOKEN: *(sp-1) += (CELL_SIZE+CELL_SIZE); NEXT;
 EXECUTE: w = *--sp; goto **w++;
+JUMP: ip += (intptr_t)*ip; NEXT;
 
 SHOW_STACK: show_stack(stack,sp); NEXT;
 BYE: puts("bye");
