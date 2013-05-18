@@ -55,7 +55,7 @@ int main(int argc, const char *argv[])
 
   PRIMITIVE("debug",5,0,0,&&DEBUG);
   PRIMITIVE("show-stack",10,0,0,&&SHOW_STACK);
-  PRIMITIVE("bye",3,0,0,&&BYE);
+  PRIMITIVE("quit",4,0,0,&&QUIT);
 
   PRIMITIVE("word:",5,0,0,&&WORD);
   PRIMITIVE("find",4,0,0,&&FIND);
@@ -109,7 +109,6 @@ EXECUTE: w = *--sp; goto **w++;
 JUMP: ip += (intptr_t)*ip; NEXT;
 
 SHOW_STACK: show_stack(stack,sp); NEXT;
-BYE: puts("bye");
 QUIT: clean_metadata(link);
   return 0;
 }
