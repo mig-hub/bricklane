@@ -19,6 +19,7 @@
   dp++
 #define DICT(V) *dp++ = V
 #define PRIMITIVE(N,L,I,H,A) HEADER(N,L,I,H); DICT(A)
+#define COMPILE(N) DICT(compile(N, link))
 
 typedef void* cell_t;
 
@@ -42,6 +43,17 @@ void show_stack(cell_t *stack, cell_t *sp) {
   fprintf(stdout, ")\n");
 }
 
+cell_t* compile(char *word, cell_t *link) {
+  cell_t *p = link;
+  while (p!=NULL) {
+    if (strcmp(word, ((word_metadata*)*(p+1))->name)==0) {
+      return p+2;
+    }
+    p = *p;
+  }
+  return p;
+}
+
 int main(int argc, const char *argv[])
 {
   cell_t stack[STACK_SIZE], *sp = stack;
@@ -56,6 +68,7 @@ int main(int argc, const char *argv[])
   PRIMITIVE("debug",5,0,0,&&DEBUG);
   PRIMITIVE("show-stack",10,0,0,&&SHOW_STACK);
   PRIMITIVE("quit",4,0,0,&&QUIT);
+  PRIMITIVE("number",6,0,0,&&NUMBER);
 
   PRIMITIVE("word:",5,0,0,&&WORD);
   PRIMITIVE("find",4,0,0,&&FIND);
@@ -67,7 +80,7 @@ int main(int argc, const char *argv[])
   DICT(dp-12); DICT(dp-10); DICT(dp-8);
   PRIMITIVE("jump",4,0,0,&&JUMP);
   HEADER("reset",5,0,0); // interpret: jump -2
-  DICT(&&NEST); DICT(dp-12); DICT(dp-5); DICT((cell_t)-2);
+  DICT(&&NEST); COMPILE("interpret:"); DICT(dp-5); DICT((cell_t)-2);
 
   ip = dp-3;
   NEXT;
@@ -93,7 +106,7 @@ WORD:
   NEXT;
 FIND:
   temp_p = link;
-  sp--;
+  --sp;
   while (temp_p!=NULL) {
     /* printf("%s\n", ((word_metadata*)*(temp_p+1))->name); */
     if (strcmp(*(sp-1), ((word_metadata*)*(temp_p+1))->name)==0) {
@@ -107,6 +120,14 @@ FIND:
 TOKEN: *(sp-1) += (CELL_SIZE+CELL_SIZE); NEXT;
 EXECUTE: w = *--sp; goto **w++;
 JUMP: ip += (intptr_t)*ip; NEXT;
+
+NUMBER:
+  --sp;
+  show_stack(stack,sp);
+  printf("%s\n", *(sp-1));
+  *(sp-1) = (cell_t)strtol(word_buffer, &end, base);
+  /* *sp++ = (cell_t)((!*end) ? -1 : 0); */
+  NEXT;
 
 SHOW_STACK: show_stack(stack,sp); NEXT;
 QUIT: clean_metadata(link);
