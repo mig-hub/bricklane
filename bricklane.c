@@ -75,12 +75,19 @@ int main(int argc, const char *argv[])
   PRIMITIVE("token",5,0,0,&&TOKEN);
   PRIMITIVE("execute",7,0,0,&&EXECUTE);
   PRIMITIVE("unnest",6,0,0,&&UNNEST);
-  
-  HEADER("interpret:",10,0,0);
-  DICT(&&NEST); COMPILE("word:"); COMPILE("find");
-  COMPILE("token"); COMPILE("execute"); COMPILE("unnest");
-  
   PRIMITIVE("jump",4,0,0,&&JUMP);
+
+  HEADER("number:",7,0,0);
+  DICT(&&NEST); COMPILE("word:");
+  COMPILE("number"); COMPILE("unnest");
+
+  HEADER("token:",6,0,0);
+  DICT(&&NEST); COMPILE("word:"); COMPILE("find");
+  COMPILE("token"); COMPILE("unnest");
+
+  HEADER("interpret:",10,0,0);
+  DICT(&&NEST); COMPILE("token:"); 
+  COMPILE("execute"); COMPILE("unnest");
   
   HEADER("reset",5,0,0);
   DICT(&&NEST); COMPILE("interpret:"); COMPILE("jump");
@@ -127,8 +134,6 @@ JUMP: ip += (intptr_t)*ip; NEXT;
 
 NUMBER:
   --sp;
-  show_stack(stack,sp);
-  printf("%s\n", *(sp-1));
   *(sp-1) = (cell_t)strtol(word_buffer, &end, base);
   /* *sp++ = (cell_t)((!*end) ? -1 : 0); */
   NEXT;
