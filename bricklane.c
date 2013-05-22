@@ -75,12 +75,16 @@ int main(int argc, const char *argv[])
   PRIMITIVE("token",5,0,0,&&TOKEN);
   PRIMITIVE("execute",7,0,0,&&EXECUTE);
   PRIMITIVE("unnest",6,0,0,&&UNNEST);
-  HEADER("interpret:",10,0,0); // word: find token execute unnest
-  DICT(&&NEST); DICT(dp-16); DICT(dp-14);
-  DICT(dp-12); DICT(dp-10); DICT(dp-8);
+  
+  HEADER("interpret:",10,0,0);
+  DICT(&&NEST); COMPILE("word:"); COMPILE("find");
+  COMPILE("token"); COMPILE("execute"); COMPILE("unnest");
+  
   PRIMITIVE("jump",4,0,0,&&JUMP);
-  HEADER("reset",5,0,0); // interpret: jump -2
-  DICT(&&NEST); COMPILE("interpret:"); DICT(dp-5); DICT((cell_t)-2);
+  
+  HEADER("reset",5,0,0);
+  DICT(&&NEST); COMPILE("interpret:"); COMPILE("jump");
+  DICT((cell_t)-2);
 
   ip = dp-3;
   NEXT;
