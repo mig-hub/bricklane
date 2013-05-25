@@ -61,7 +61,7 @@ int main(int argc, const char *argv[])
   cell_t dictionary[IMAGE_SIZE], *dp = dictionary, *link = NULL, *ip, *w;
   char base = 10, state = 0;
   char word_buffer[WORD_SIZE], *word_p = word_buffer;
-  cell_t temp, *temp_p;
+  cell_t *temp_p;
   char temp_char, *end;
   div_t divmod_result;
 
@@ -69,6 +69,14 @@ int main(int argc, const char *argv[])
   PRIMITIVE("show-stack",10,0,0,&&SHOW_STACK);
   PRIMITIVE("quit",4,0,0,&&QUIT);
   PRIMITIVE("number",6,0,0,&&NUMBER);
+
+  PRIMITIVE("drop",4,0,0,&&DROP);
+  PRIMITIVE("swap",4,0,0,&&SWAP);
+  PRIMITIVE("dup",3,0,0,&&DUP);
+  PRIMITIVE("over",4,0,0,&&OVER);
+  PRIMITIVE("dig",3,0,0,&&DIG);
+  PRIMITIVE("bury",4,0,0,&&BURY);
+  /* 2drop 2dup 2swap ?dup */
 
   PRIMITIVE("word:",5,0,0,&&WORD);
   PRIMITIVE("find",4,0,0,&&FIND);
@@ -139,6 +147,22 @@ NUMBER:
   NEXT;
 
 SHOW_STACK: show_stack(stack,sp); NEXT;
+
+DROP: sp--; NEXT;
+SWAP:
+  w = *(sp-1); *(sp-1) = *(sp-2);
+  *(sp-2) = w; NEXT;
+DUP: *sp++ = *(sp-1); NEXT;
+OVER: *sp++ = *(sp-2); NEXT;
+DIG:
+  w = *(sp-3); *(sp-3) = *(sp-2);
+  *(sp-2) = *(sp-1); *(sp-1) = w;
+  NEXT;
+BURY:
+  w = *(sp-1); *(sp-1) = *(sp-2);
+  *(sp-2) = *(sp-3); *(sp-3) = w;
+  NEXT;
+
 QUIT: clean_metadata(link);
   return 0;
 }
