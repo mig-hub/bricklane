@@ -77,6 +77,13 @@ int main(int argc, const char *argv[])
   PRIMITIVE("dig",3,0,0,&&DIG);
   PRIMITIVE("bury",4,0,0,&&BURY);
   /* 2drop 2dup 2swap ?dup */
+  PRIMITIVE("1+",2,0,0,&&INCREMENT);
+  PRIMITIVE("1-",2,0,0,&&DECREMENT);
+  PRIMITIVE("+",1,0,0,&&PLUS);
+  PRIMITIVE("-",1,0,0,&&MINUS);
+  PRIMITIVE("*",1,0,0,&&MULTIPLY);
+  PRIMITIVE("/mod",4,0,0,&&DIVMOD);
+  /* u/mod */
 
   PRIMITIVE("word:",5,0,0,&&WORD);
   PRIMITIVE("find",4,0,0,&&FIND);
@@ -161,6 +168,16 @@ DIG:
 BURY:
   w = *(sp-1); *(sp-1) = *(sp-2);
   *(sp-2) = *(sp-3); *(sp-3) = w;
+  NEXT;
+INCREMENT: *(sp-1) += 1; NEXT;
+DECREMENT: *(sp-1) -= 1; NEXT;
+PLUS: *((sp--)-2) += (intptr_t)*(sp-1); NEXT;
+MINUS: *((sp--)-2) -= (intptr_t)*(sp-1); NEXT;
+MULTIPLY: *((sp--)-2) = (cell_t)((intptr_t)*(sp-1) * (intptr_t)*(sp-2)); NEXT;
+DIVMOD:
+  divmod_result = div((intptr_t)*(sp-2), (intptr_t)*(sp-1));
+  *(sp-2) = (cell_t)divmod_result.quot;
+  *(sp-1) = (cell_t)divmod_result.rem;
   NEXT;
 
 QUIT: clean_metadata(link);

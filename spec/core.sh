@@ -13,13 +13,13 @@ it_shows_an_empty_stack() {
 }
 
 it_drops() {
-  R=$(echo number: 255 number: 113 drop show-stack quit | bricklane)
-  test "$R" = "( 255 )"
+  R=$(echo number: 355 number: 113 drop show-stack quit | bricklane)
+  test "$R" = "( 355 )"
 }
 
 it_swaps() {
-  R=$(echo number: 113 number: 255 swap show-stack quit | bricklane)
-  test "$R" = "( 255 113 )"
+  R=$(echo number: 113 number: 355 swap show-stack quit | bricklane)
+  test "$R" = "( 355 113 )"
 }
 
 it_duplicates() {
@@ -40,5 +40,30 @@ it_digs() {
 it_buries() {
   R=$(echo number: 1 number: 2 number: 3 bury show-stack quit | bricklane)
   test "$R" = "( 3 1 2 )"
+}
+
+it_increments_and_decrements() {
+  R=$(echo number: 354 1+ number: 114 1- show-stack quit | bricklane)
+  test "$R" = "( 355 113 )"
+}
+
+it_adds() {
+  R=$(echo number: -20 number: 62 + show-stack quit | bricklane)
+  test "$R" = "( 42 )"
+}
+
+it_substracts() {
+  R=$(echo number: 20 number: -22 - show-stack quit | bricklane)
+  test "$R" = "( 42 )"
+}
+
+it_multiplies() {
+  R=$(echo number: -157 number: -2 \* show-stack quit | bricklane)
+  test "$R" = "( 314 )"
+}
+
+it_divides_with_remain() {
+  R=$(echo number: 355 number: 113 /mod show-stack quit | bricklane)
+  test "$R" = "( 3 16 )"
 }
 
