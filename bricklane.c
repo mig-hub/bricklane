@@ -69,7 +69,11 @@ int main(int argc, const char *argv[])
   PRIMITIVE("show-stack",10,0,0,&&SHOW_STACK);
   PRIMITIVE("quit",4,0,0,&&QUIT);
   PRIMITIVE("number",6,0,0,&&NUMBER);
-
+  PRIMITIVE("create",6,0,0,&&CREATE);
+  PRIMITIVE(",",1,0,0,&&COMMA);
+  PRIMITIVE("push[]",9,0,0,&&PUSH_LITERAL);
+  PRIMITIVE("@",1,0,0,&&FETCH);
+  PRIMITIVE("!",1,0,0,&&STORE);
   PRIMITIVE("drop",4,0,0,&&DROP);
   PRIMITIVE("swap",4,0,0,&&SWAP);
   PRIMITIVE("dup",3,0,0,&&DUP);
@@ -81,20 +85,33 @@ int main(int argc, const char *argv[])
   PRIMITIVE("1-",2,0,0,&&DECREMENT);
   PRIMITIVE("+",1,0,0,&&PLUS);
   PRIMITIVE("-",1,0,0,&&MINUS);
-  PRIMITIVE("*",1,0,0,&&MULTIPLY);
+  PRIMITIVE("*",1,0,0,&&TIMES);
   PRIMITIVE("/mod",4,0,0,&&DIVMOD);
   /* u/mod */
+
+  /* variables */
+  /* HEADER("base",4,0,0); DICT(&&DEBUG); */
+  /* COMPILE("push[]"); DICT(&base); COMPILE("unnest"); */
+
+  /* constants */
+  PRIMITIVE("nest-token",10,0,0,&&NEST_TOKEN);
+  /* DICT(&&DODOES); DICT(dp+2); DICT(&&NEST); */
+  /* COMPILE("@"); COMPILE("unnest"); */
 
   PRIMITIVE("word:",5,0,0,&&WORD);
   PRIMITIVE("find",4,0,0,&&FIND);
   PRIMITIVE("token",5,0,0,&&TOKEN);
   PRIMITIVE("execute",7,0,0,&&EXECUTE);
   PRIMITIVE("unnest",6,0,0,&&UNNEST);
-  PRIMITIVE("jump",4,0,0,&&JUMP);
+  PRIMITIVE("jump[]",6,0,0,&&JUMP);
 
   HEADER("number:",7,0,0);
   DICT(&&NEST); COMPILE("word:");
   COMPILE("number"); COMPILE("unnest");
+
+  HEADER("create:",7,0,0);
+  DICT(&&NEST); COMPILE("word:");
+  COMPILE("create"); COMPILE("unnest");
 
   HEADER("token:",6,0,0);
   DICT(&&NEST); COMPILE("word:"); COMPILE("find");
@@ -105,16 +122,23 @@ int main(int argc, const char *argv[])
   COMPILE("execute"); COMPILE("unnest");
   
   HEADER("reset",5,0,0);
-  DICT(&&NEST); COMPILE("interpret:"); COMPILE("jump");
+  DICT(&&NEST); COMPILE("interpret:"); COMPILE("jump[]");
   DICT((cell_t)-2);
 
   ip = dp-3;
   NEXT;
 
-DEBUG: puts("debug"); NEXT;
+DEBUG: *sp++ = (cell_t)&base; NEXT;
 
 NEST: *rp++ = ip; ip = w; NEXT;
 UNNEST: ip = *--rp; NEXT;
+
+DODOES:
+  *sp++ = w+1;
+  if(*w) { *rp++ = ip; ip = *w; }
+  NEXT;
+
+NEST_TOKEN: *sp++ = &&NEST; NEXT;
 
 WORD:
   word_p = word_buffer;
@@ -155,7 +179,13 @@ NUMBER:
   NEXT;
 
 SHOW_STACK: show_stack(stack,sp); NEXT;
-
+CREATE:
+  w = *--sp;
+  HEADER((char*)*--sp,(intptr_t)w,0,0); NEXT;
+COMMA: DICT(*--sp); NEXT;
+PUSH_LITERAL: *sp++ = *ip++; NEXT;
+FETCH: w = *--sp; *sp++ = *w; NEXT;
+STORE: w = *--sp; *w = *--sp; NEXT;
 DROP: sp--; NEXT;
 SWAP:
   w = *(sp-1); *(sp-1) = *(sp-2);
@@ -174,7 +204,7 @@ INCREMENT: *(sp-1) += 1; NEXT;
 DECREMENT: *(sp-1) -= 1; NEXT;
 PLUS: *((sp--)-2) += (intptr_t)*(sp-1); NEXT;
 MINUS: *((sp--)-2) -= (intptr_t)*(sp-1); NEXT;
-MULTIPLY: *((sp--)-2) = (cell_t)((intptr_t)*(sp-1) * (intptr_t)*(sp-2)); NEXT;
+TIMES: *((sp--)-2) = (cell_t)((intptr_t)*(sp-1) * (intptr_t)*(sp-2)); NEXT;
 DIVMOD:
   divmod_result = div((intptr_t)*(sp-2), (intptr_t)*(sp-1));
   *(sp-2) = (cell_t)divmod_result.quot;

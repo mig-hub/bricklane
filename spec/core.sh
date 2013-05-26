@@ -67,3 +67,8 @@ it_divides_with_remain() {
   test "$R" = "( 3 16 )"
 }
 
+it_compiles_in_interpreted_mode() {
+  R=$(echo create: double nest-token , token: dup , token: + , token: unnest , number: 16 double show-stack | bricklane)
+  test "$R" = "( 32 )"
+}
+
