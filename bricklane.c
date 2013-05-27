@@ -147,7 +147,7 @@ WORD:
     temp_char = getchar();
   }
   while(!isspace(temp_char)) {
-    if (temp_char==EOF) return 0;
+    if (temp_char==EOF) goto QUIT;
     *word_p++ = temp_char;
     temp_char = getchar();
   }
