@@ -69,7 +69,7 @@ int main(int argc, const char *argv[])
   PRIMITIVE("show-stack",10,0,0,&&SHOW_STACK);
   PRIMITIVE("quit",4,0,0,&&QUIT);
   PRIMITIVE("number",6,0,0,&&NUMBER);
-  PRIMITIVE("create",6,0,0,&&CREATE);
+  PRIMITIVE("header",6,0,0,&&CREATE_HEADER);
   PRIMITIVE(",",1,0,0,&&COMMA);
   PRIMITIVE("push[]",9,0,0,&&PUSH_LITERAL);
   PRIMITIVE("@",1,0,0,&&FETCH);
@@ -110,9 +110,9 @@ int main(int argc, const char *argv[])
   DICT(&&NEST); COMPILE("word:");
   COMPILE("number"); COMPILE("unnest");
 
-  HEADER("create:",7,0,0);
+  HEADER("header:",7,0,0);
   DICT(&&NEST); COMPILE("word:");
-  COMPILE("create"); COMPILE("unnest");
+  COMPILE("header"); COMPILE("unnest");
 
   HEADER("token:",6,0,0);
   DICT(&&NEST); COMPILE("word:"); COMPILE("find");
@@ -180,7 +180,7 @@ NUMBER:
   NEXT;
 
 SHOW_STACK: show_stack(stack,sp); NEXT;
-CREATE:
+CREATE_HEADER:
   w = *--sp;
   HEADER((char*)*--sp,(intptr_t)w,0,0); NEXT;
 COMMA: DICT(*--sp); NEXT;
