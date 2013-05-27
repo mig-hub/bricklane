@@ -72,3 +72,8 @@ it_compiles_in_interpreted_mode() {
   test "$R" = "( 32 )"
 }
 
+it_makes_choices() {
+  R=$(echo number: -1 number: 355 number: 113 \? number: 0 number: 34 number: 21 \? show-stack | bricklane )
+  test "$R" = "( 355 21 )"
+}
+

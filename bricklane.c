@@ -74,6 +74,7 @@ int main(int argc, const char *argv[])
   PRIMITIVE("push[]",9,0,0,&&PUSH_LITERAL);
   PRIMITIVE("@",1,0,0,&&FETCH);
   PRIMITIVE("!",1,0,0,&&STORE);
+  PRIMITIVE("?",1,0,0,&&CHOICE);
   PRIMITIVE("drop",4,0,0,&&DROP);
   PRIMITIVE("swap",4,0,0,&&SWAP);
   PRIMITIVE("dup",3,0,0,&&DUP);
@@ -90,7 +91,7 @@ int main(int argc, const char *argv[])
   /* u/mod */
 
   /* variables */
-  /* HEADER("base",4,0,0); DICT(&&DEBUG); */
+  HEADER("base",4,0,0); DICT(&&DEBUG);
   /* COMPILE("push[]"); DICT(&base); COMPILE("unnest"); */
 
   /* constants */
@@ -128,7 +129,7 @@ int main(int argc, const char *argv[])
   ip = dp-3;
   NEXT;
 
-DEBUG: *sp++ = (cell_t)&base; NEXT;
+DEBUG: *sp++ = &base; NEXT;
 
 NEST: *rp++ = ip; ip = w; NEXT;
 UNNEST: ip = *--rp; NEXT;
@@ -186,6 +187,9 @@ COMMA: DICT(*--sp); NEXT;
 PUSH_LITERAL: *sp++ = *ip++; NEXT;
 FETCH: w = *--sp; *sp++ = *w; NEXT;
 STORE: w = *--sp; *w = *--sp; NEXT;
+CHOICE:
+  *(sp-3) = *(sp-3) ? *(sp-2) : *(sp-1);
+  sp -= 2; NEXT;
 DROP: sp--; NEXT;
 SWAP:
   w = *(sp-1); *(sp-1) = *(sp-2);
