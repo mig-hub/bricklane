@@ -89,3 +89,25 @@ it_makes_choices() {
   stack_is  355 21
 }
 
+logical_case() {
+  script_is number: $1 number: $2 $3 show-stack
+  stack_is $4
+}
+
+logical_cases() {
+  logical_case 0 0 $1 $2
+  logical_case 0 -1 $1 $3
+  logical_case -1 0 $1 $4
+  logical_case -1 -1 $1 $5
+}
+
+it_is_logical() {
+  logical_cases and 0 0 0 -1
+  logical_cases or 0 -1 -1 -1
+  logical_cases xor 0 -1 -1 0
+  script_is number: 0 not show-stack
+  stack_is -1
+  script_is number: -1 not show-stack
+  stack_is 0
+}
+

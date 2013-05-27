@@ -89,6 +89,10 @@ int main(int argc, const char *argv[])
   PRIMITIVE("*",1,0,0,&&TIMES);
   PRIMITIVE("/mod",4,0,0,&&DIVMOD);
   /* u/mod */
+  PRIMITIVE("and",3,0,0,&&AND);
+  PRIMITIVE("or",2,0,0,&&OR);
+  PRIMITIVE("xor",3,0,0,&&XOR);
+  PRIMITIVE("not",3,0,0,&&NOT);
 
   /* variables */
   HEADER("base",4,0,0); DICT(&&DEBUG);
@@ -185,7 +189,7 @@ CREATE_HEADER:
   HEADER((char*)*--sp,(intptr_t)w,0,0); NEXT;
 COMMA: DICT(*--sp); NEXT;
 PUSH_LITERAL: *sp++ = *ip++; NEXT;
-FETCH: w = *--sp; *sp++ = *w; NEXT;
+FETCH: //*(sp-1) = *(intptr_t*)*(sp-1); NEXT;
 STORE: w = *--sp; *w = *--sp; NEXT;
 CHOICE:
   *(sp-3) = *(sp-3) ? *(sp-2) : *(sp-1);
@@ -214,6 +218,10 @@ DIVMOD:
   *(sp-2) = (cell_t)divmod_result.quot;
   *(sp-1) = (cell_t)divmod_result.rem;
   NEXT;
+AND: *((sp--)-2) = (cell_t)((intptr_t)*(sp-1) & (intptr_t)*(sp-2)); NEXT;
+OR: *((sp--)-2) = (cell_t)((intptr_t)*(sp-1) | (intptr_t)*(sp-2)); NEXT;
+XOR: *((sp--)-2) = (cell_t)((intptr_t)*(sp-1) ^ (intptr_t)*(sp-2)); NEXT;
+NOT: *(sp-1) = (cell_t)~(intptr_t)*(sp-1); NEXT;
 
 QUIT: clean_metadata(link);
   return 0;
