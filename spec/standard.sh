@@ -1,6 +1,18 @@
 describe "Bricklane Standard Library"
 
+script_is() {
+  R=$(echo "$*" | cat standard.bl - | bricklane)
+}
+
+stdout_is() {
+  test "$R" = "$1"
+}
+
+stack_is() {
+  stdout_is "( $* )"
+}
+
 it_has_shortcut_for_compiling() {
-  R=$(echo create-word: double compile: dup compile: + compile: unnest number: 16 double show-stack | cat standard.bl - | bricklane)
-  test "$R" = "( 32 )"
+  script_is create-word: double compile: dup compile: + compile: unnest number: 16 double show-stack
+  stack_is 32
 }
