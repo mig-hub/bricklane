@@ -59,7 +59,7 @@ int main(int argc, const char *argv[])
   cell_t stack[STACK_SIZE], *sp = stack;
   cell_t return_stack[RETURN_STACK_SIZE], *rp = return_stack;
   cell_t dictionary[IMAGE_SIZE], *dp = dictionary, *link = NULL, *ip, *w;
-  char base = 10, state = 0;
+  intptr_t base = 10, state = 0;
   char word_buffer[WORD_SIZE], *word_p = word_buffer;
   cell_t *temp_p;
   char temp_char, *end;
@@ -189,7 +189,7 @@ CREATE_HEADER:
   HEADER((char*)*--sp,(intptr_t)w,0,0); NEXT;
 COMMA: DICT(*--sp); NEXT;
 PUSH_LITERAL: *sp++ = *ip++; NEXT;
-FETCH: //*(sp-1) = *(intptr_t*)*(sp-1); NEXT;
+FETCH: w = *--sp; *sp++ = *w; NEXT;
 STORE: w = *--sp; *w = *--sp; NEXT;
 CHOICE:
   *(sp-3) = *(sp-3) ? *(sp-2) : *(sp-1);

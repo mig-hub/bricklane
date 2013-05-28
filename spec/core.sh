@@ -89,6 +89,11 @@ it_makes_choices() {
   stack_is  355 21
 }
 
+it_fetches_and_stores() {
+  script_is base @ number: 2 base ! base @ show-stack
+  stack_is 10 2
+}
+
 logical_case() {
   script_is number: $1 number: $2 $3 show-stack
   stack_is $4
