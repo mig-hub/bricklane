@@ -116,3 +116,24 @@ it_is_logical() {
   stack_is 0
 }
 
+compare_case() {
+  script_is number: $1 number: $2 $3 show-stack
+  stack_is $4
+}
+
+compare_cases() {
+  compare_case 42 42 $1 $2
+  compare_case -42 -42 $1 $3
+  compare_case 42 -42 $1 $4
+  compare_case -42 42 $1 $5
+}
+
+it_compares() {
+  compare_cases "=" -1 -1 0 0
+  compare_cases "~=" 0 0 -1 -1
+  compare_cases "<" 0 0 0 -1
+  compare_cases ">" 0 0 -1 0
+  compare_cases "<=" -1 -1 0 -1
+  compare_cases ">=" -1 -1 -1 0
+}
+

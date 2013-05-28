@@ -93,6 +93,12 @@ int main(int argc, const char *argv[])
   PRIMITIVE("or",2,0,0,&&OR);
   PRIMITIVE("xor",3,0,0,&&XOR);
   PRIMITIVE("not",3,0,0,&&NOT);
+  PRIMITIVE("=",1,0,0,&&EQ);
+  PRIMITIVE("~=",2,0,0,&&NEQ);
+  PRIMITIVE("<",1,0,0,&&LT);
+  PRIMITIVE(">",1,0,0,&&GT);
+  PRIMITIVE("<=",2,0,0,&&LTE);
+  PRIMITIVE(">=",2,0,0,&&GTE);
 
   /* variables */
   HEADER("base",4,0,0); DICT(&&DEBUG);
@@ -222,6 +228,12 @@ AND: *((sp--)-2) = (cell_t)((intptr_t)*(sp-1) & (intptr_t)*(sp-2)); NEXT;
 OR: *((sp--)-2) = (cell_t)((intptr_t)*(sp-1) | (intptr_t)*(sp-2)); NEXT;
 XOR: *((sp--)-2) = (cell_t)((intptr_t)*(sp-1) ^ (intptr_t)*(sp-2)); NEXT;
 NOT: *(sp-1) = (cell_t)~(intptr_t)*(sp-1); NEXT;
+EQ: *sp++ = (cell_t)-(*--sp == *--sp); NEXT;
+NEQ: *sp++ = (cell_t)-(*--sp != *--sp); NEXT;
+LT: *sp++ = (cell_t)-(*--sp < *--sp); NEXT;
+GT: *sp++ = (cell_t)-(*--sp > *--sp); NEXT;
+LTE: *sp++ = (cell_t)-(*--sp <= *--sp); NEXT;
+GTE: *sp++ = (cell_t)-(*--sp >= *--sp); NEXT;
 
 QUIT: clean_metadata(link);
   return 0;
