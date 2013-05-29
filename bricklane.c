@@ -74,6 +74,8 @@ int main(int argc, const char *argv[])
   PRIMITIVE("push[]",9,0,0,&&PUSH_LITERAL);
   PRIMITIVE("@",1,0,0,&&FETCH);
   PRIMITIVE("!",1,0,0,&&STORE);
+  PRIMITIVE("+!",2,0,0,&&PLUS_STORE);
+  PRIMITIVE("-!",2,0,0,&&MINUS_STORE);
   PRIMITIVE("?",1,0,0,&&CHOICE);
   PRIMITIVE("drop",4,0,0,&&DROP);
   PRIMITIVE("swap",4,0,0,&&SWAP);
@@ -197,6 +199,8 @@ COMMA: DICT(*--sp); NEXT;
 PUSH_LITERAL: *sp++ = *ip++; NEXT;
 FETCH: w = *--sp; *sp++ = *w; NEXT;
 STORE: w = *--sp; *w = *--sp; NEXT;
+PLUS_STORE: w = *--sp; *w += (intptr_t)*--sp; NEXT;
+MINUS_STORE: w = *--sp; *w -= (intptr_t)*--sp; NEXT;
 CHOICE:
   *(sp-3) = *(sp-3) ? *(sp-2) : *(sp-1);
   sp -= 2; NEXT;

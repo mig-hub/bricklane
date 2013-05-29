@@ -92,6 +92,10 @@ it_makes_choices() {
 it_fetches_and_stores() {
   script_is base @ number: 2 base ! base @ show-stack
   stack_is 10 2
+  script_is number: 8 base -! base @ show-stack
+  stack_is 2
+  script_is number: -8 base +! base @ show-stack
+  stack_is 2
 }
 
 logical_case() {
