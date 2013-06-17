@@ -84,18 +84,32 @@ it_compiles_in_interpreted_mode() {
   stack_is  32
 }
 
+it_compiles_a_litteral() {
+  script_is header: five nest-token , token: push\[] , number: 5 , token: unnest , five show-stack
+  stack_is 5
+}
+
 it_makes_choices() {
   script_is number: -1 number: 355 number: 113 \? number: 0 number: 34 number: 21 \? show-stack
   stack_is  355 21
 }
 
-it_fetches_and_stores() {
+it_fetches_and_stores_core_variables() {
   script_is base @ number: 2 base ! base @ show-stack
   stack_is 10 2
   script_is number: 8 base -! base @ show-stack
   stack_is 2
   script_is number: -8 base +! base @ show-stack
   stack_is 2
+}
+
+it_fetches_and_stores_variables() {
+  script_is state @ number: 2 state ! state @ show-stack
+  stack_is -1 2
+  script_is number: 8 state -! state @ show-stack
+  stack_is -9
+  script_is number: -8 state +! state @ show-stack
+  stack_is -9
 }
 
 logical_case() {

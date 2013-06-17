@@ -59,7 +59,7 @@ int main(int argc, const char *argv[])
   cell_t stack[STACK_SIZE], *sp = stack;
   cell_t return_stack[RETURN_STACK_SIZE], *rp = return_stack;
   cell_t dictionary[IMAGE_SIZE], *dp = dictionary, *link = NULL, *ip, *w;
-  intptr_t base = 10, state = 0;
+  intptr_t base = 10;
   char word_buffer[WORD_SIZE], *word_p = word_buffer;
   cell_t *temp_p;
   char temp_char, *end;
@@ -71,7 +71,7 @@ int main(int argc, const char *argv[])
   PRIMITIVE("number",6,0,0,&&NUMBER);
   PRIMITIVE("header",6,0,0,&&CREATE_HEADER);
   PRIMITIVE(",",1,0,0,&&COMMA);
-  PRIMITIVE("push[]",9,0,0,&&PUSH_LITERAL);
+  PRIMITIVE("push[]",6,0,0,&&PUSH_LITERAL);
   PRIMITIVE("@",1,0,0,&&FETCH);
   PRIMITIVE("!",1,0,0,&&STORE);
   PRIMITIVE("+!",2,0,0,&&PLUS_STORE);
@@ -102,21 +102,23 @@ int main(int argc, const char *argv[])
   PRIMITIVE("<=",2,0,0,&&LTE);
   PRIMITIVE(">=",2,0,0,&&GTE);
 
-  /* variables */
-  HEADER("base",4,0,0); DICT(&&DEBUG);
-  /* COMPILE("push[]"); DICT(&base); COMPILE("unnest"); */
-
-  /* constants */
-  PRIMITIVE("nest-token",10,0,0,&&NEST_TOKEN);
-  /* DICT(&&DODOES); DICT(dp+2); DICT(&&NEST); */
-  /* COMPILE("@"); COMPILE("unnest"); */
-
   PRIMITIVE("word:",5,0,0,&&WORD);
   PRIMITIVE("find",4,0,0,&&FIND);
   PRIMITIVE("token",5,0,0,&&TOKEN);
   PRIMITIVE("execute",7,0,0,&&EXECUTE);
   PRIMITIVE("unnest",6,0,0,&&UNNEST);
   PRIMITIVE("jump[]",6,0,0,&&JUMP);
+
+  /* variables */
+  HEADER("base",4,0,0); DICT(&&NEST);
+  COMPILE("push[]"); DICT(&base); COMPILE("unnest");
+  HEADER("state",5,0,0);
+  DICT(&&DODOES); DICT((cell_t)0); DICT((cell_t)-1);
+
+  /* constants */
+  PRIMITIVE("nest-token",10,0,0,&&NEST_TOKEN);
+  /* DICT(&&DODOES); DICT(dp+2); DICT(&&NEST); */
+  /* COMPILE("@"); COMPILE("unnest"); */
 
   HEADER("number:",7,0,0);
   DICT(&&NEST); COMPILE("word:");
@@ -148,7 +150,7 @@ UNNEST: ip = *--rp; NEXT;
 
 DODOES:
   *sp++ = w+1;
-  if(*w) { *rp++ = ip; ip = *w; }
+  /* if(*w) { *rp++ = ip; ip = *w; } */
   NEXT;
 
 NEST_TOKEN: *sp++ = &&NEST; NEXT;
