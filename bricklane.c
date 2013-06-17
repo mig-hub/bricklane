@@ -102,6 +102,7 @@ int main(int argc, const char *argv[])
   PRIMITIVE("<=",2,0,0,&&LTE);
   PRIMITIVE(">=",2,0,0,&&GTE);
 
+  /* interpreter primitives */
   PRIMITIVE("word:",5,0,0,&&WORD);
   PRIMITIVE("find",4,0,0,&&FIND);
   PRIMITIVE("token",5,0,0,&&TOKEN);
@@ -116,9 +117,12 @@ int main(int argc, const char *argv[])
   DICT(&&DODOES); DICT((cell_t)0); DICT((cell_t)-1);
 
   /* constants */
-  PRIMITIVE("nest-token",10,0,0,&&NEST_TOKEN);
-  /* DICT(&&DODOES); DICT(dp+2); DICT(&&NEST); */
-  /* COMPILE("@"); COMPILE("unnest"); */
+  HEADER("nest-token",10,0,0); DICT(&&NEST);
+  COMPILE("push[]"); DICT(&&NEST); COMPILE("unnest");
+  HEADER("dodoes-token",12,0,0); DICT(&&NEST);
+  COMPILE("push[]"); DICT(&&DODOES); COMPILE("unnest");
+
+  /* compiled words */
 
   HEADER("number:",7,0,0);
   DICT(&&NEST); COMPILE("word:");
@@ -152,8 +156,6 @@ DODOES:
   *sp++ = w+1;
   /* if(*w) { *rp++ = ip; ip = *w; } */
   NEXT;
-
-NEST_TOKEN: *sp++ = &&NEST; NEXT;
 
 WORD:
   word_p = word_buffer;
