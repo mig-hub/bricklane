@@ -54,6 +54,21 @@ it_buries() {
   stack_is  3 1 2
 }
 
+it_moves_in_and_out_of_return_stack() {
+  script_is number: 1 \>r number: 2 number: 3 r\> show-stack
+  stack_is 2 3 1
+}
+
+it_copies_from_return_stack() {
+  script_is number: 1 \>r number: 2 number: 3 r@ r\> show-stack
+  stack_is 2 3 1 1
+}
+
+it_drops_return_stack_items() {
+  script_is number: 1 \>r number: 2 \>r r-drop r\> show-stack
+  stack_is 1
+}
+
 it_increments_and_decrements() {
   script_is number: 354 1+ number: 114 1- show-stack
   stack_is  355 113
