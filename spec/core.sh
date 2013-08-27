@@ -54,21 +54,6 @@ it_buries() {
   stack_is  3 1 2
 }
 
-it_moves_in_and_out_of_return_stack() {
-  script_is number: 1 \>r number: 2 number: 3 r\> show-stack
-  stack_is 2 3 1
-}
-
-it_copies_from_return_stack() {
-  script_is number: 1 \>r number: 2 number: 3 r@ r\> show-stack
-  stack_is 2 3 1 1
-}
-
-it_drops_return_stack_items() {
-  script_is number: 1 \>r number: 2 \>r r-drop r\> show-stack
-  stack_is 1
-}
-
 it_increments_and_decrements() {
   script_is number: 354 1+ number: 114 1- show-stack
   stack_is  355 113
@@ -102,6 +87,11 @@ it_compiles_in_interpreted_mode() {
 it_compiles_a_litteral() {
   script_is header: five nest-token , token: push\[] , number: 5 , token: unnest , five show-stack
   stack_is 5
+}
+
+it_moves_in_and_out_of_return_stack() {
+  script_is header: rtest nest-token , token: push\[\] , number: 1 , token: \>r , token: push\[\] , number: 2 , token: push\[\] , number: 3 , token: r@ , token: r\> , token: unnest , rtest show-stack
+  stack_is 2 3 1 1
 }
 
 it_makes_choices() {

@@ -86,8 +86,7 @@ int main(int argc, const char *argv[])
   /* 2drop 2dup 2swap ?dup */
   PRIMITIVE(">r",2,0,0,&&TO_R);
   PRIMITIVE("r>",2,0,0,&&FROM_R);
-  PRIMITIVE("r@",2,0,0,&&AT_R);
-  PRIMITIVE("r-drop",6,0,0,&&DROP_R);
+  PRIMITIVE("r@",2,0,0,&&R_FETCH);
   PRIMITIVE("1+",2,0,0,&&INCREMENT);
   PRIMITIVE("1-",2,0,0,&&DECREMENT);
   PRIMITIVE("+",1,0,0,&&PLUS);
@@ -226,10 +225,9 @@ BURY:
   w = *(sp-1); *(sp-1) = *(sp-2);
   *(sp-2) = *(sp-3); *(sp-3) = w;
   NEXT;
-TO_R: w = *--rp; *rp++ = *--sp; *rp++ = w; NEXT;
-FROM_R: w = *--rp; *sp++ = *--rp; *rp++ = w; NEXT;
-AT_R: *sp++ = *(rp-2); NEXT;
-DROP_R: w = *--rp; rp--; *rp++ = w; NEXT;
+TO_R: *rp++ = *--sp; NEXT;
+FROM_R: *sp++ = *--rp; NEXT;
+R_FETCH: *sp++ = *(rp-1); NEXT;
 INCREMENT: *(sp-1) += 1; NEXT;
 DECREMENT: *(sp-1) -= 1; NEXT;
 PLUS: *((sp--)-2) += (intptr_t)*(sp-1); NEXT;
