@@ -84,7 +84,7 @@ it_compiles_in_interpreted_mode() {
   stack_is  32
 }
 
-it_compiles_a_litteral() {
+it_compiles_literals() {
   script_is header: five nest-token , token: push\[] , number: 5 , token: unnest , five show-stack
   stack_is 5
 }

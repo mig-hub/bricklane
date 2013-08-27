@@ -1,3 +1,4 @@
 header: create-word: nest-token , token: header: , token: nest-token , token: , , token: unnest ,
 create-word: compile: token: token: , token: , , token: unnest ,
+create-word: compile-number: token: push[] dup , , compile: , compile: number: compile: , compile: unnest
 
