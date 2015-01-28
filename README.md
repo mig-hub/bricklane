@@ -22,6 +22,14 @@ Roadmap
 - Work on the dictionary
   - Flexible length?
   - Char based?
+- Try to replace jump[] =0jump[] with something based on tokens and execute
+  - This is how I would like to do it on high level anyway
+  - It might need recursion
+- Recursion has 2 possible implementations
+  - The name reference itself and old version is called with a special word (like super in oop)
+  - The name refers to the old version and current word is called with `recurse` (prefered)
+  - It all depends on hidden words
+  - End of definition can make a work un-hidden but it needs to work on low level
 
 Features wishlist
 =================

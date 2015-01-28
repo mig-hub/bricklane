@@ -70,7 +70,7 @@ it_substracts() {
 }
 
 it_multiplies() {
-  script_is number: -157 number: -2 \* show-stack
+  script_is 'number: -157 number: -2 * show-stack'
   stack_is  314
 }
 
@@ -85,17 +85,17 @@ it_compiles_in_interpreted_mode() {
 }
 
 it_compiles_literals() {
-  script_is header: five nest-token , token: push\[] , number: 5 , token: unnest , five show-stack
+  script_is 'header: five nest-token , token: push[] , number: 5 , token: unnest , five show-stack'
   stack_is 5
 }
 
 it_moves_in_and_out_of_return_stack() {
-  script_is header: rtest nest-token , token: push\[\] , number: 1 , token: \>r , token: push\[\] , number: 2 , token: push\[\] , number: 3 , token: r@ , token: r\> , token: unnest , rtest show-stack
+  script_is 'header: rtest nest-token , token: push[] , number: 1 , token: >r , token: push[] , number: 2 , token: push[] , number: 3 , token: r@ , token: r> , token: unnest , rtest show-stack'
   stack_is 2 3 1 1
 }
 
 it_makes_choices() {
-  script_is number: -1 number: 355 number: 113 \? number: 0 number: 34 number: 21 \? show-stack
+  script_is 'number: -1 number: 355 number: 113 ? number: 0 number: 34 number: 21 ? show-stack'
   stack_is  355 21
 }
 
